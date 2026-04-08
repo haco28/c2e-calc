@@ -1,7 +1,7 @@
 import {CalculatorStrategy} from "../../../CalculatorStrategy";
+import {BarEn101Schema}  from "../schemas/schema";
 
 type ClimaticZoneCoefficients = { H1: number, H2: number, H3: number };
-type CalculationParams = { surface: number, zone: string };
 
 export class V3 implements CalculatorStrategy {
     private readonly coefficients: ClimaticZoneCoefficients  = {
@@ -10,9 +10,14 @@ export class V3 implements CalculatorStrategy {
         H3: 920
     };
 
-    public calculate(calculationParams: CalculationParams): number {
-        const surface:number = calculationParams.surface;
-        const zone:string = calculationParams.zone;
+    public calculate(calculationParams: object): number {
+        const result = BarEn101Schema.safeParse(calculationParams);
+        if (!result.success) {
+            throw result.error;
+        }
+
+        const surface:number = result.data.surface;
+        const zone:string = result.data.zone;
 
         return surface * this.coefficients[zone as keyof ClimaticZoneCoefficients];
     }
